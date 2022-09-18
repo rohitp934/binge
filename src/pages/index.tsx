@@ -1,14 +1,18 @@
 import type { NextPage } from 'next';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Head from 'next/head';
+import { useEffect, useState } from 'react';
 import GithubIcon from '../icons/github';
 import GoogleIcon from '../icons/google';
 import { trpc } from '../utils/trpc';
 
 const Home: NextPage = () => {
 	const { data: session } = useSession();
-	// if (session)
-	//   const hello = trpc.useQuery(['auth.getSession']);
+	const [secretMessage, setSecretMessage] = useState<string | null>(null);
+	const { data, error, isLoading } = trpc.useQuery(['auth.getSecretMessage']);
+	useEffect(() => {
+		setSecretMessage(data ?? '');
+	}, [data]);
 
 	return (
 		<>
@@ -23,15 +27,18 @@ const Home: NextPage = () => {
 					Binge.<span className="text-purple-400">app</span>
 				</h1>
 				{session ? (
-					<div className="pt-6 text-2xl text-blue-500 flex justify-center items-center w-full">
-						Hello{' '}
-						{session.user ? <p>{session.user.name}</p> : <p> Loading..</p>}
+					<div className="flex-col pt-6 text-2xl text-blue-500 flex justify-center items-center w-full">
+						<p>Hello {session.user ? session.user.name : 'Loading...'}</p>
+						<div className="p-2"></div>
 						<button
 							className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
 							onClick={() => signOut()}
 						>
 							Sign Out
 						</button>
+						<div className="absolute bottom-6 text-2xl text-purple-400">
+							{secretMessage}
+						</div>
 					</div>
 				) : (
 					<>
